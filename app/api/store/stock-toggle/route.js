@@ -41,7 +41,7 @@ export async function POST(request)
 
         const product = await prisma.product.findFirst({
             where: {
-                productId, // jis product ko toggle karna hai
+                id: productId, // jis product ko toggle karna hai
                 storeId,   // ensure karo ki product iss seller ka hi ho
             },
         });

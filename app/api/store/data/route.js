@@ -6,10 +6,10 @@ import { NextResponse } from "next/server";
 export async function GET(request) {
     try {
         // 🔹 URL ke query parameters extract kar rahe hai
-        const { serachParams } = new URL(request.url);
+        const { searchParams } = new URL(request.url);
 
         // 🔹 "username" param get karke lowercase me convert kar diya
-        const username = serachParams.get('username')?.toLowerCase();
+        const username = searchParams.get('username')?.toLowerCase();
 
         // 🔸 Agar username missing hai → error return karo
         if (!username) {
@@ -40,7 +40,7 @@ export async function GET(request) {
         }
 
         // 🟢 Store + products + ratings response me bhej do
-        return NextResponse.json(store);
+        return NextResponse.json({store});
 
     } catch (error) {
         console.error(error);

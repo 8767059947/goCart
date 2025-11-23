@@ -14,6 +14,8 @@ export async function POST(request)
         // 👉 Clerk se user ka auth info nikal rahe hain
         const { userId } = getAuth(request);
 
+        console.log("🔥 BACKEND userId from POST:", userId);
+
         // 👉 Check karte hain ki yeh user valid seller hai ya nahi
         const storeId = await authSeller(userId);
 
@@ -57,7 +59,7 @@ export async function POST(request)
 
                 // 👉 Optimized image URL generate kar rahe hain
                 const url = imagekit.url({
-                    src: response.filePath,
+                    path: response.filePath,
                     transformation: [
                         { quality: "auto" },
                         { format: "webp" },

@@ -6,7 +6,11 @@ import { NextResponse } from "next/server";
 export async function GET(request) {
   try {
     // 🔹 Clerk se current logged-in user ka userId extract kar rahe hain
-    const { userId } = getAuth(request);
+    const { userId, sessionId } = getAuth(request);
+
+    // console.log("🔥 API /is-admin → userId:", userId);
+    // console.log("🔥 API /is-admin → sessionId:", sessionId);
+    // console.log("🔥 API /is-admin → headers:", request.headers);
 
     // 🔹 authAdmin function se check karte hain ki user admin hai ya nahi
     const isAdmin = await authAdmin(userId);
