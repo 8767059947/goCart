@@ -18,10 +18,62 @@ export default function StoreAddProduct() {
         price: 0,
         category: "",
     })
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const [aiUsed, setAiUsed] = useState(false);
     const { getToken, isLoaded, userId } = useAuth();
     console.log("🔵 useAuth():", { isLoaded, userId });
 
+
+    const handleImageUpload = async (key, file) => {
+        // 🖼️ Update local image preview state
+        setImages(prev => ({ ...prev, [key]: file }));
+
+        // 🧠 Agar pehla image upload ho raha hai aur AI abhi tak use nahi hua
+        if (key === "1" && file && !aiUsed) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            reader.onloadend = async () => {
+                const base64String = reader.result.split(",")[1];
+                const mimeType = file.type;
+                const token = await getToken();
+
+                try {
+                    // 🟢 AI API ko call karte hain aur toast me status show karte hain
+                    await toast.promise(
+                        axios.post(
+                            "/api/store/ai",
+                            { base64Image: base64String, mimeType },
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        ),
+                        {
+                            loading: "Analyzing image with AI...",
+                            success: (res) => {
+                                const data = res.data
+                                if(data.name && data.description)
+                                {
+                                    setProductInfo(prev => ({
+                                        ...prev,
+                                        name: data.name,
+                                        description: data.description
+                                    }))
+                                    setAiUsed(true);
+                                    return "Ai filled product info"
+                                }
+                                return "AI could not analyze the image"
+                            },
+                            error: (error) => error?.response?.data?.error || error.message
+                        }
+                    );
+                } catch (error) {
+                    console.error(error);
+                    toast.error(error?.response?.data?.error || error.message);
+                }
+            };
+
+
+        }
+    };
 
 
     const onChangeHandler = (e) => {
@@ -78,12 +130,12 @@ export default function StoreAddProduct() {
     };
 
 
-useEffect(() => {
-  (async () => {
-    const t = await getToken();
-    console.log("🟡 Token from getToken():", t);
-  })();
-}, []);
+    useEffect(() => {
+        (async () => {
+            const t = await getToken();
+            console.log("🟡 Token from getToken():", t);
+        })();
+    }, []);
 
 
     return (
@@ -95,7 +147,7 @@ useEffect(() => {
                 {Object.keys(images).map((key) => (
                     <label key={key} htmlFor={`images${key}`}>
                         <Image width={300} height={300} className='h-15 w-auto border border-slate-200 rounded cursor-pointer' src={images[key] ? URL.createObjectURL(images[key]) : assets.upload_area} alt="" />
-                        <input type="file" accept='image/*' id={`images${key}`} onChange={e => setImages({ ...images, [key]: e.target.files[0] })} hidden />
+                        <input type="file" accept='image/*' id={`images${key}`} onChange={e => handleImageUpload(key, e.target.files[0])} hidden />
                     </label>
                 ))}
             </div>
